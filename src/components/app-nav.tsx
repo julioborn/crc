@@ -44,6 +44,8 @@ const GESTION_LINKS = [
   { href: '/app/cobros', label: 'Cobros' },
   { href: '/app/egresos', label: 'Egresos' },
   { href: '/app/reportes', label: 'Reportes' },
+  { href: '/app/recursos', label: 'Recursos' },
+  { href: '/app/panel-turnos', label: 'Panel de turnos' },
 ];
 
 function NavLinks({ esDirectiva, mostrarGestion, className }: { esDirectiva: boolean; mostrarGestion: boolean; className: string }) {
@@ -51,6 +53,12 @@ function NavLinks({ esDirectiva, mostrarGestion, className }: { esDirectiva: boo
     <nav className={className}>
       <Link href="/app/mis-cuotas" className="hover:text-paper">
         Mis cuotas
+      </Link>
+      <Link href="/app/reservar" className="hover:text-paper">
+        Reservar
+      </Link>
+      <Link href="/app/mis-turnos" className="hover:text-paper">
+        Mis turnos
       </Link>
       {esDirectiva &&
         ADMIN_LINKS.map((link) => (
