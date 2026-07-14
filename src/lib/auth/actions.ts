@@ -50,7 +50,7 @@ export async function registro(
   // handle_nuevo_usuario (trigger en auth.users) lee nombre/apellido/telefono
   // de acá para crear la fila en public.usuario. Ver supabase/migrations/
   // 20260713230835_correcciones.sql.
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: { data: { nombre, apellido, telefono } },
@@ -60,12 +60,9 @@ export async function registro(
     return { error: error.message };
   }
 
-  // Si el proyecto no exige confirmar el email, signUp ya deja sesión activa.
-  if (data.session) {
-    redirect('/app');
-  }
-
-  redirect('/registro/confirmar');
+  // "Confirm email" está desactivado en el proyecto: signUp ya deja
+  // sesión activa, se entra directo.
+  redirect('/app');
 }
 
 export async function recuperar(

@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Barlow_Condensed, Public_Sans, JetBrains_Mono } from "next/font/google";
 import { club } from "@/config/club";
 import { ClubThemeStyle } from "@/components/club-theme";
 import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const publicSans = Public_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-display",
+  weight: ["600", "700", "800"],
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -29,12 +36,17 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(
+        "h-full antialiased",
+        publicSans.variable,
+        barlowCondensed.variable,
+        jetbrainsMono.variable,
+      )}
     >
       <head>
         <ClubThemeStyle />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col font-sans">
         {children}
         <Toaster />
       </body>

@@ -16,6 +16,11 @@ export const club = {
   colores: {
     primario: '#22c55e',
     primarioForeground: '#052e16',
+    // "Tinta" y "papel" en vez de negro/blanco puros: la tinta lleva un
+    // dejo verde (liga el neutro a la marca) y el papel es un blanco
+    // hueso, no clínico — piensa en cartulina de carnet, no en pantalla.
+    tinta: '#0e1512',
+    papel: '#fafaf8',
   },
 
   features: {
