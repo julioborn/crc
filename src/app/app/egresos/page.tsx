@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { areasGestionadas, type CargoRow } from '@/lib/auth/roles';
 import { NuevoEgresoForm } from './nuevo-egreso-form';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader, NuevoCard, SectionLabel, ItemCard, EmptyState } from '@/components/admin/kit';
 
 export default async function EgresosPage() {
   const supabase = await createClient();
@@ -45,29 +46,27 @@ export default async function EgresosPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">Egresos</h1>
-        <p className="text-sm text-muted-foreground">
-          Gastos de tu área (o del club, si sos CD). Queda registrado en el
-          mismo lugar que los ingresos: movimiento.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Gestión"
+        title="Egresos"
+        description="Gastos de tu área (o del club, si sos CD). Queda registrado en el mismo lugar que los ingresos: movimiento."
+      />
 
-      <NuevoEgresoForm areas={areasDisponibles} puedeClub={!!esDirectiva} />
+      <NuevoCard title="Registrar egreso">
+        <NuevoEgresoForm areas={areasDisponibles} puedeClub={!!esDirectiva} />
+      </NuevoCard>
 
-      <div className="space-y-2">
-        <h2 className="font-display text-lg font-semibold">Últimos egresos</h2>
+      <div className="space-y-3">
+        <SectionLabel count={movimientos?.length ?? 0}>Últimos egresos</SectionLabel>
         {(movimientos ?? []).map((m) => (
-          <div key={m.id} className="flex items-center gap-3 rounded-lg border p-3 text-sm">
-            <span className="text-muted-foreground">{m.fecha}</span>
-            <span>{m.concepto}</span>
+          <ItemCard key={m.id} className="flex flex-wrap items-center gap-3 space-y-0 py-3">
+            <span className="text-sm text-muted-foreground">{m.fecha}</span>
+            <span className="text-sm">{m.concepto}</span>
             <Badge variant="secondary">{m.area?.nombre ?? 'Club'}</Badge>
-            <span className="ml-auto font-mono">${m.monto}</span>
-          </div>
+            <span className="ml-auto font-mono text-sm font-semibold">${m.monto}</span>
+          </ItemCard>
         ))}
-        {(movimientos?.length ?? 0) === 0 && (
-          <p className="text-sm text-muted-foreground">Todavía no hay egresos registrados.</p>
-        )}
+        {(movimientos?.length ?? 0) === 0 && <EmptyState>Todavía no hay egresos registrados.</EmptyState>}
       </div>
     </div>
   );

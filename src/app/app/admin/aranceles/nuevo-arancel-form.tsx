@@ -34,7 +34,7 @@ export function NuevoArancelForm({ areas }: { areas: { id: string; nombre: strin
   }, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-4 rounded-lg border p-4">
+    <form ref={formRef} action={formAction} className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Un arancel nunca se edita: esto cierra el vigente (le pone la fecha de
         ayer como <code>vigente_hasta</code>) y crea uno nuevo. El histórico

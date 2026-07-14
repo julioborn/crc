@@ -25,7 +25,7 @@ export function NuevaInscripcionForm({ areas }: { areas: { id: string; nombre: s
   }, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-4 rounded-lg border p-4">
+    <form ref={formRef} action={formAction} className="space-y-4">
       <div className="space-y-1">
         <Label>Socio</Label>
         <SocioPicker />

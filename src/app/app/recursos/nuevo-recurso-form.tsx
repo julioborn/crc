@@ -25,7 +25,7 @@ export function NuevoRecursoForm({ areas }: { areas: { id: string; nombre: strin
   }, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-4 rounded-lg border p-4">
+    <form ref={formRef} action={formAction} className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
           <Label htmlFor="nombre">Nombre</Label>

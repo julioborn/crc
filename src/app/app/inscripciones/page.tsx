@@ -6,6 +6,7 @@ import { NuevaInscripcionForm } from './nueva-inscripcion-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader, NuevoCard, SectionLabel, ItemCard, EmptyState } from '@/components/admin/kit';
 
 export default async function InscripcionesPage() {
   const supabase = await createClient();
@@ -63,62 +64,48 @@ export default async function InscripcionesPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">
-          Inscripción a actividades
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Inscribir a un socio genera el adicional de esa actividad — no entra
-          en el descuento del grupo familiar.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Gestión"
+        title="Inscripción a actividades"
+        description="Inscribir a un socio genera el adicional de esa actividad — no entra en el descuento del grupo familiar."
+      />
 
       {(areasElegibles?.length ?? 0) === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No hay áreas inscribibles activas asignadas a tu comisión todavía.
-        </p>
+        <EmptyState>No hay áreas inscribibles activas asignadas a tu comisión todavía.</EmptyState>
       ) : (
-        <NuevaInscripcionForm areas={areasElegibles ?? []} />
+        <NuevoCard title="Nueva inscripción">
+          <NuevaInscripcionForm areas={areasElegibles ?? []} />
+        </NuevoCard>
       )}
 
       <div className="space-y-3">
+        <SectionLabel count={inscripciones?.length ?? 0}>Inscripciones</SectionLabel>
         {(inscripciones ?? []).map((i) => {
           const activa = !i.fecha_baja || i.fecha_baja >= hoy;
           return (
-            <form
-              key={i.id}
-              action={darDeBajaInscripcion.bind(null, i.id)}
-              className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
-            >
+            <ItemCard key={i.id} className="flex flex-wrap items-center gap-3 space-y-0 py-4">
               <span className="text-sm font-medium">
-                #{i.socio?.numero_socio} {i.socio?.usuario?.nombre}{' '}
-                {i.socio?.usuario?.apellido}
+                #{i.socio?.numero_socio} {i.socio?.usuario?.nombre} {i.socio?.usuario?.apellido}
               </span>
               <Badge variant="secondary">{i.area?.nombre}</Badge>
-              <Badge variant={activa ? 'default' : 'secondary'}>
-                {activa ? 'Activa' : 'De baja'}
-              </Badge>
+              <Badge variant={activa ? 'default' : 'secondary'}>{activa ? 'Activa' : 'De baja'}</Badge>
               <span className="text-xs text-muted-foreground">desde {i.fecha_alta}</span>
 
               {activa && (
-                <div className="ml-auto flex items-center gap-2">
-                  <Input
-                    name="fecha_baja"
-                    type="date"
-                    defaultValue={hoy}
-                    className="h-8 w-auto"
-                  />
+                <form
+                  action={darDeBajaInscripcion.bind(null, i.id)}
+                  className="ml-auto flex items-center gap-2"
+                >
+                  <Input name="fecha_baja" type="date" defaultValue={hoy} className="h-8 w-auto" />
                   <Button type="submit" size="sm" variant="outline">
                     Dar de baja
                   </Button>
-                </div>
+                </form>
               )}
-            </form>
+            </ItemCard>
           );
         })}
-        {inscripciones?.length === 0 && (
-          <p className="text-sm text-muted-foreground">Todavía no hay inscripciones.</p>
-        )}
+        {inscripciones?.length === 0 && <EmptyState>Todavía no hay inscripciones.</EmptyState>}
       </div>
     </div>
   );

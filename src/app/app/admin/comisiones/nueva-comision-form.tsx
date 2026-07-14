@@ -18,7 +18,7 @@ export function NuevaComisionForm() {
   }, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-3 rounded-lg border p-4">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <div className="space-y-1">
         <Label htmlFor="nombre">Nombre</Label>
         <Input id="nombre" name="nombre" required placeholder="Subcomisión de Básquet" />

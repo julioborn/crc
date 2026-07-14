@@ -7,6 +7,8 @@ import { club } from '@/config/club';
 import { MembershipCard } from '@/components/membership-card';
 import { BotonPagarMP } from '@/components/boton-pagar-mp';
 import { Badge } from '@/components/ui/badge';
+import { SectionLabel } from '@/components/admin/kit';
+import { cn } from '@/lib/utils';
 import {
   CheckCircle,
   Clock,
@@ -14,7 +16,6 @@ import {
   Wallet,
   CalendarDays,
   Ticket,
-  ArrowRight,
   ClipboardCheck,
   ClipboardList,
   Banknote,
@@ -57,10 +58,49 @@ function AccesoRapido({ href, icono, label }: { href: string; icono: React.React
   return (
     <Link
       href={href}
-      className="flex flex-1 flex-col items-center gap-2 rounded-lg border p-4 text-center text-sm font-medium transition-colors hover:border-primary/40 hover:bg-primary/5"
+      className="group flex flex-1 flex-col items-center gap-2 rounded-xl border border-transparent bg-card p-3 text-center transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-sm"
     >
-      <span className="text-primary">{icono}</span>
-      {label}
+      <span className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+        {icono}
+      </span>
+      <span className="text-xs leading-tight font-medium">{label}</span>
+    </Link>
+  );
+}
+
+function KpiCard({
+  href,
+  icono,
+  label,
+  valor,
+  urgente,
+}: {
+  href: string;
+  icono: React.ReactNode;
+  label: string;
+  valor: number;
+  urgente: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'flex min-w-[10rem] flex-1 items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-primary/30',
+        urgente && 'border-primary/25 bg-primary/[0.04]',
+      )}
+    >
+      <span
+        className={cn(
+          'flex size-10 shrink-0 items-center justify-center rounded-full',
+          urgente ? 'bg-primary/15 text-primary' : 'bg-ink/[0.06] text-muted-foreground',
+        )}
+      >
+        {icono}
+      </span>
+      <div>
+        <p className="font-display text-2xl leading-none font-bold">{valor}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
     </Link>
   );
 }
@@ -194,7 +234,7 @@ export default async function AppHomePage() {
   });
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-5xl space-y-8">
       <div>
         <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">{hoyLargo}</p>
         <h1 className="font-display text-3xl font-bold tracking-tight">Hola, {usuario?.nombre ?? nombreCompleto}</h1>
@@ -322,55 +362,68 @@ export default async function AppHomePage() {
           </div>
         )}
 
-        {/* Gestión — solo para quien tiene cargo. Va con todo: quien
-            administra un área o toda la Directiva no debería tener que
-            abrir el menú para llegar a lo que gestiona todos los días. */}
-        {tieneCargo && (
-          <div className="space-y-4 rounded-lg border border-ink/15 bg-ink/[0.03] p-5 sm:col-span-2 lg:col-span-3">
-            <p className="flex items-center gap-1.5 font-mono text-xs tracking-widest text-muted-foreground uppercase">
-              <Shield className="size-3.5" />
-              {esDirectiva ? 'Comisión Directiva' : `Gestión · ${misAreas.map((a) => a.nombre).join(', ')}`}
-            </p>
+      </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/app/panel-turnos"
-                className="flex items-center gap-2 rounded-md border bg-card px-4 py-2 text-sm hover:border-primary/40"
-              >
-                <ClipboardCheck className="size-4 text-primary" />
-                {pendientesAprobar} turno{pendientesAprobar === 1 ? '' : 's'} por aprobar
-                <ArrowRight className="size-3.5 text-muted-foreground" />
-              </Link>
-              <Link
-                href="/app/panel-turnos"
-                className="flex items-center gap-2 rounded-md border bg-card px-4 py-2 text-sm hover:border-primary/40"
-              >
-                <Banknote className="size-4 text-primary" />
-                {porCobrar} por cobrar
-                <ArrowRight className="size-3.5 text-muted-foreground" />
-              </Link>
+      {/* Panel de gestión — separado del grid personal a propósito: es
+          "lo que administrás", no otra tarjeta de "lo tuyo". Quien
+          administra un área o toda la Directiva no debería tener que
+          abrir el menú para llegar a lo que gestiona todos los días. */}
+      {tieneCargo && (
+        <section className="space-y-5 rounded-2xl border border-ink/10 bg-ink/[0.02] p-5 sm:p-6">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-paper">
+              <Shield className="size-4.5" />
+            </span>
+            <div>
+              <p className="font-display text-xl font-bold tracking-tight">
+                {esDirectiva ? 'Comisión Directiva' : 'Panel de gestión'}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {esDirectiva
+                  ? 'Alcance sobre todo el club.'
+                  : `A cargo de ${misAreas.map((a) => a.nombre).join(', ')}`}
+              </p>
             </div>
+          </div>
 
+          <div className="flex flex-wrap gap-3">
+            <KpiCard
+              href="/app/panel-turnos"
+              icono={<ClipboardCheck className="size-4.5" />}
+              label={`turno${pendientesAprobar === 1 ? '' : 's'} por aprobar`}
+              valor={pendientesAprobar}
+              urgente={pendientesAprobar > 0}
+            />
+            <KpiCard
+              href="/app/panel-turnos"
+              icono={<Banknote className="size-4.5" />}
+              label="por cobrar"
+              valor={porCobrar}
+              urgente={porCobrar > 0}
+            />
+          </div>
+
+          <div className="space-y-3">
+            <SectionLabel>Gestión</SectionLabel>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {GESTION_ACCESOS.map((g) => (
                 <AccesoRapido key={g.href} href={g.href} icono={g.icono} label={g.label} />
               ))}
             </div>
-
-            {esDirectiva && (
-              <>
-                <div className="h-px bg-ink/10" />
-                <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">Administración</p>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-                  {ADMIN_ACCESOS.map((a) => (
-                    <AccesoRapido key={a.href} href={a.href} icono={a.icono} label={a.label} />
-                  ))}
-                </div>
-              </>
-            )}
           </div>
-        )}
-      </div>
+
+          {esDirectiva && (
+            <div className="space-y-3">
+              <SectionLabel>Administración</SectionLabel>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                {ADMIN_ACCESOS.map((a) => (
+                  <AccesoRapido key={a.href} href={a.href} icono={a.icono} label={a.label} />
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }

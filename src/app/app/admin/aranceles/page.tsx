@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NuevoArancelForm } from './nuevo-arancel-form';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader, NuevoCard, SectionLabel, ItemCard, EmptyState } from '@/components/admin/kit';
+import { cn } from '@/lib/utils';
 
 const TIPO_LABEL: Record<string, string> = {
   social: 'Social',
@@ -32,33 +34,41 @@ export default async function ArancelesPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">Aranceles</h1>
-        <p className="text-sm text-muted-foreground">
-          Social, social familiar y por actividad. El monto se congela en cada
-          cuota emitida — cambiar el arancel nunca afecta cuotas ya generadas.
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <PageHeader
+        eyebrow="Administración"
+        title="Aranceles"
+        description="Social, social familiar y por actividad. El monto se congela en cada cuota emitida — cambiar el arancel nunca afecta cuotas ya generadas."
+      />
 
-      <NuevoArancelForm areas={areas ?? []} />
+      <NuevoCard title="Nuevo arancel">
+        <NuevoArancelForm areas={areas ?? []} />
+      </NuevoCard>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
+        <SectionLabel count={grupos.size}>Aranceles</SectionLabel>
         {Array.from(grupos.entries()).map(([clave, lista]) => {
           const tipo = clave.split(':')[0];
           const nombreArea = lista[0]?.area?.nombre;
           return (
-            <div key={clave} className="rounded-lg border p-4">
-              <h2 className="mb-3 font-display text-lg font-semibold">
+            <ItemCard key={clave}>
+              <p className="font-display text-lg font-semibold">
                 {TIPO_LABEL[tipo]}
                 {nombreArea ? ` · ${nombreArea}` : ''}
-              </h2>
-              <ul className="space-y-1.5 text-sm">
+              </p>
+              <ul className="space-y-2 text-sm">
                 {lista.map((a) => {
                   const vigente = a.vigente_hasta === null || a.vigente_hasta >= hoy;
                   return (
                     <li key={a.id} className="flex items-center gap-3">
-                      <span className="font-mono">${a.monto}</span>
+                      <span
+                        className={cn(
+                          'font-mono',
+                          vigente ? 'text-xl font-semibold text-primary' : 'text-muted-foreground',
+                        )}
+                      >
+                        ${a.monto}
+                      </span>
                       <span className="text-muted-foreground">
                         desde {a.vigente_desde}
                         {a.vigente_hasta ? ` hasta ${a.vigente_hasta}` : ''}
@@ -68,12 +78,10 @@ export default async function ArancelesPage() {
                   );
                 })}
               </ul>
-            </div>
+            </ItemCard>
           );
         })}
-        {arancelesData.length === 0 && (
-          <p className="text-sm text-muted-foreground">Todavía no hay aranceles cargados.</p>
-        )}
+        {arancelesData.length === 0 && <EmptyState>Todavía no hay aranceles cargados.</EmptyState>}
       </div>
     </div>
   );

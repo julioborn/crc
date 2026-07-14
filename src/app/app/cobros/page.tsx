@@ -3,6 +3,8 @@ import { SocioPicker } from '@/components/admin/socio-picker';
 import { CobroForm } from './cobro-form';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader, SectionLabel, ItemCard, EmptyState } from '@/components/admin/kit';
+import { Search } from 'lucide-react';
 
 export default async function CobrosPage({
   searchParams,
@@ -43,49 +45,44 @@ export default async function CobrosPage({
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">
-          Cobro presencial
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Efectivo o transferencia. El monto siempre sale de la cuota — no se
-          puede editar acá.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Gestión"
+        title="Cobro presencial"
+        description="Efectivo o transferencia. El monto siempre sale de la cuota — no se puede editar acá."
+      />
 
-      <form method="GET" className="space-y-3 rounded-lg border p-4">
-        <SocioPicker name="socio_id" />
+      <form method="GET" className="flex items-end gap-2 rounded-xl border p-4">
+        <div className="flex-1 space-y-1">
+          <label className="flex items-center gap-1.5 text-sm font-medium">
+            <Search className="size-3.5 text-muted-foreground" /> Buscar socio
+          </label>
+          <SocioPicker name="socio_id" />
+        </div>
         <Button type="submit" size="sm" variant="outline" className="w-auto">
           Ver cuotas impagas
         </Button>
       </form>
 
-      {socioId && !socio && (
-        <p className="text-sm text-muted-foreground">No se encontró ese socio.</p>
-      )}
+      {socioId && !socio && <EmptyState>No se encontró ese socio.</EmptyState>}
 
       {socio && (
         <div className="space-y-3">
-          <h2 className="font-display text-lg font-semibold">
-            #{socio.numero_socio} {socio.usuario?.nombre} {socio.usuario?.apellido}
-          </h2>
-          {cuotas.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              No tiene cuotas impagas que puedas cobrar vos.
-            </p>
-          )}
+          <SectionLabel count={cuotas.length}>
+            {`#${socio.numero_socio} ${socio.usuario?.nombre} ${socio.usuario?.apellido}`}
+          </SectionLabel>
+          {cuotas.length === 0 && <EmptyState>No tiene cuotas impagas que puedas cobrar vos.</EmptyState>}
           {cuotas.map((c) => (
-            <div key={c.id} className="space-y-2 rounded-lg border p-4">
+            <ItemCard key={c.id}>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">
                   {c.tipo === 'actividad' ? `Actividad — ${c.area?.nombre}` : 'Social'}
                 </span>
                 <span className="text-sm text-muted-foreground">{c.periodo}</span>
                 <Badge variant="destructive">Impaga</Badge>
-                <span className="ml-auto font-mono">${c.monto}</span>
+                <span className="ml-auto font-mono text-lg font-semibold">${c.monto}</span>
               </div>
               <CobroForm cuotaId={c.id} />
-            </div>
+            </ItemCard>
           ))}
         </div>
       )}

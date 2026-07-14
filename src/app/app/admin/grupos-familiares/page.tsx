@@ -8,6 +8,8 @@ import { NuevoGrupoForm } from './nuevo-grupo-form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { PageHeader, NuevoCard, SectionLabel, ItemCard, EmptyState } from '@/components/admin/kit';
 
 export default async function GruposFamiliaresPage() {
   const supabase = await createClient();
@@ -24,24 +26,30 @@ export default async function GruposFamiliaresPage() {
     `#${s.numero_socio} ${s.usuario?.nombre} ${s.usuario?.apellido}`;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">Grupos familiares</h1>
-        <p className="text-sm text-muted-foreground">
-          Tarifa plana: una sola cuota social por grupo. Todos los integrantes
-          son socios.
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <PageHeader
+        eyebrow="Administración"
+        title="Grupos familiares"
+        description="Tarifa plana: una sola cuota social por grupo. Todos los integrantes son socios."
+      />
 
-      <NuevoGrupoForm />
+      <NuevoCard title="Nuevo grupo familiar">
+        <NuevoGrupoForm />
+      </NuevoCard>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
+        <SectionLabel count={grupos?.length ?? 0}>Grupos cargados</SectionLabel>
         {(grupos ?? []).map((grupo) => {
           const miembros = (socios ?? []).filter((s) => s.grupo_familiar_id === grupo.id);
           const disponibles = (socios ?? []).filter((s) => s.grupo_familiar_id !== grupo.id);
 
           return (
-            <div key={grupo.id} className="space-y-4 rounded-lg border p-4">
+            <ItemCard key={grupo.id} className="space-y-5">
+              <div className="flex items-center gap-2">
+                <p className="font-display text-lg font-semibold">{grupo.nombre}</p>
+                {!grupo.activo && <Badge variant="secondary">Inactivo</Badge>}
+              </div>
+
               <form action={actualizarGrupo.bind(null, grupo.id)} className="space-y-3">
                 <div className="space-y-1">
                   <label className="text-sm font-medium">Nombre</label>
@@ -97,10 +105,7 @@ export default async function GruposFamiliaresPage() {
                 </ul>
 
                 {disponibles.length > 0 && (
-                  <form
-                    action={agregarSocioAGrupo.bind(null, grupo.id)}
-                    className="flex gap-2 pt-2"
-                  >
+                  <form action={agregarSocioAGrupo.bind(null, grupo.id)} className="flex gap-2 pt-2">
                     <select
                       name="socio_id"
                       required
@@ -119,12 +124,10 @@ export default async function GruposFamiliaresPage() {
                   </form>
                 )}
               </div>
-            </div>
+            </ItemCard>
           );
         })}
-        {grupos?.length === 0 && (
-          <p className="text-sm text-muted-foreground">Todavía no hay grupos familiares.</p>
-        )}
+        {grupos?.length === 0 && <EmptyState>Todavía no hay grupos familiares.</EmptyState>}
       </div>
     </div>
   );

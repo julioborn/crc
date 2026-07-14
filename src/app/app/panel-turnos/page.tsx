@@ -6,6 +6,7 @@ import { aprobarTurno, rechazarTurno, marcarAusente } from '@/lib/admin/panel-tu
 import { CobrarTurnoForm } from './cobrar-turno-form';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader, SectionLabel, ItemCard, EmptyState } from '@/components/admin/kit';
 
 const ESTADO_LABEL: Record<string, string> = {
   pendiente_aprobacion: 'Pendiente',
@@ -76,25 +77,29 @@ export default async function PanelTurnosPage({
     .lte('inicio', finDia)
     .order('inicio');
 
+  const hayPendientes = (pendientes?.length ?? 0) > 0;
+
   return (
     <div className="mx-auto max-w-3xl space-y-10">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">Panel de turnos</h1>
-        <p className="text-sm text-muted-foreground">
-          Aprobá lo pendiente, cobrá lo presencial, marcá ausentes.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Gestión"
+        title="Panel de turnos"
+        description="Aprobá lo pendiente, cobrá lo presencial, marcá ausentes."
+      />
 
       <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold">Pendientes de aprobación</h2>
+        <SectionLabel count={pendientes?.length ?? 0}>Pendientes de aprobación</SectionLabel>
         {(pendientes ?? []).map((t) => (
-          <div key={t.id} className="flex flex-wrap items-center gap-3 rounded-lg border p-3 text-sm">
+          <ItemCard
+            key={t.id}
+            className="flex flex-wrap items-center gap-3 space-y-0 border-primary/25 bg-primary/[0.03] py-3"
+          >
             <span className="font-medium">{nombreRecurso.get(t.recurso_id)}</span>
-            <span className="text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
               {t.usuario?.nombre} {t.usuario?.apellido}
             </span>
-            <span className="text-muted-foreground">{formatearFechaHoraLocal(t.inicio)}</span>
-            <span className="font-mono">${t.precio}</span>
+            <span className="text-sm text-muted-foreground">{formatearFechaHoraLocal(t.inicio)}</span>
+            <span className="font-mono text-sm font-semibold">${t.precio}</span>
             <div className="ml-auto flex gap-2">
               <form action={aprobarTurno.bind(null, t.id)}>
                 <Button type="submit" size="sm">
@@ -107,17 +112,15 @@ export default async function PanelTurnosPage({
                 </Button>
               </form>
             </div>
-          </div>
+          </ItemCard>
         ))}
-        {(pendientes?.length ?? 0) === 0 && (
-          <p className="text-sm text-muted-foreground">No hay turnos pendientes.</p>
-        )}
+        {!hayPendientes && <EmptyState>No hay turnos pendientes.</EmptyState>}
       </section>
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold">Agenda del día</h2>
-          <form method="GET" className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <SectionLabel>Agenda del día</SectionLabel>
+          <form method="GET" className="flex shrink-0 items-center gap-2">
             <input
               type="date"
               name="fecha"
@@ -131,20 +134,18 @@ export default async function PanelTurnosPage({
         </div>
 
         {(agenda ?? []).map((t) => (
-          <div key={t.id} className="space-y-2 rounded-lg border p-3 text-sm">
+          <ItemCard key={t.id}>
             <div className="flex flex-wrap items-center gap-3">
               <span className="font-medium">{nombreRecurso.get(t.recurso_id)}</span>
-              <span className="text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 {t.usuario?.nombre} {t.usuario?.apellido}
               </span>
-              <span className="text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 {formatearHoraLocal(t.inicio)}–{formatearHoraLocal(t.fin)}
               </span>
               <Badge variant="secondary">{ESTADO_LABEL[t.estado]}</Badge>
-              <Badge variant={t.cobrado ? 'default' : 'secondary'}>
-                {t.cobrado ? 'Cobrado' : 'Sin cobrar'}
-              </Badge>
-              <span className="ml-auto font-mono">${t.precio}</span>
+              <Badge variant={t.cobrado ? 'default' : 'secondary'}>{t.cobrado ? 'Cobrado' : 'Sin cobrar'}</Badge>
+              <span className="ml-auto font-mono text-sm font-semibold">${t.precio}</span>
               {t.estado === 'confirmado' && (
                 <form action={marcarAusente.bind(null, t.id)}>
                   <Button type="submit" size="sm" variant="ghost">
@@ -154,11 +155,9 @@ export default async function PanelTurnosPage({
               )}
             </div>
             {t.estado === 'confirmado' && !t.cobrado && <CobrarTurnoForm turnoId={t.id} />}
-          </div>
+          </ItemCard>
         ))}
-        {(agenda?.length ?? 0) === 0 && (
-          <p className="text-sm text-muted-foreground">No hay turnos ese día.</p>
-        )}
+        {(agenda?.length ?? 0) === 0 && <EmptyState>No hay turnos ese día.</EmptyState>}
       </section>
     </div>
   );

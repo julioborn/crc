@@ -17,7 +17,7 @@ export function NuevoGrupoForm() {
   }, initialState);
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-3 rounded-lg border p-4">
+    <form ref={formRef} action={formAction} className="space-y-3">
       <div className="space-y-1">
         <Label htmlFor="nombre">Nombre del grupo</Label>
         <Input id="nombre" name="nombre" required placeholder="Familia Pérez" />

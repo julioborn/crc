@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { SocioPicker } from '@/components/admin/socio-picker';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PageHeader, SectionLabel, ItemCard, EmptyState, StatRow } from '@/components/admin/kit';
+import { Search } from 'lucide-react';
 
 const ESTADO_VARIANT: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   impaga: 'destructive',
@@ -81,94 +83,89 @@ export default async function ReportesPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-10">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">Reportes</h1>
-        <p className="text-sm text-muted-foreground">
-          {esDirectiva
+      <PageHeader
+        eyebrow="Gestión"
+        title="Reportes"
+        description={
+          esDirectiva
             ? 'Consolidado del club. Cada área abajo es lo que generó y gastó.'
-            : 'Lo que generó y gastó tu área. Otras áreas no aparecen acá.'}
-        </p>
-      </div>
+            : 'Lo que generó y gastó tu área. Otras áreas no aparecen acá.'
+        }
+      />
 
       <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold">Por área</h2>
+        <SectionLabel count={grupos.size}>Por área</SectionLabel>
         {esDirectiva && (
-          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
-            <p className="text-sm font-medium">Consolidado</p>
-            <div className="mt-1 flex gap-6 font-mono text-sm">
-              <span>Ingresos ${totalIngresos.toFixed(2)}</span>
-              <span>Egresos ${totalEgresos.toFixed(2)}</span>
-              <span className="font-semibold">Neto ${(totalIngresos - totalEgresos).toFixed(2)}</span>
+          <div className="rounded-xl border border-primary/25 bg-primary/[0.04] p-5">
+            <p className="mb-2 text-sm font-medium">Consolidado</p>
+            <div className="flex flex-wrap gap-6">
+              <StatRow label="Ingresos" value={`$${totalIngresos.toFixed(2)}`} />
+              <StatRow label="Egresos" value={`$${totalEgresos.toFixed(2)}`} />
+              <StatRow label="Neto" value={`$${(totalIngresos - totalEgresos).toFixed(2)}`} className="text-primary" />
             </div>
           </div>
         )}
         {Array.from(grupos.values()).map((g) => (
-          <div key={g.nombre} className="rounded-lg border p-4">
+          <ItemCard key={g.nombre}>
             <p className="text-sm font-medium">{g.nombre}</p>
-            <div className="mt-1 flex gap-6 font-mono text-sm text-muted-foreground">
-              <span>Ingresos ${g.ingresos.toFixed(2)}</span>
-              <span>Egresos ${g.egresos.toFixed(2)}</span>
-              <span>Neto ${(g.ingresos - g.egresos).toFixed(2)}</span>
+            <div className="flex flex-wrap gap-6">
+              <StatRow label="Ingresos" value={`$${g.ingresos.toFixed(2)}`} />
+              <StatRow label="Egresos" value={`$${g.egresos.toFixed(2)}`} />
+              <StatRow label="Neto" value={`$${(g.ingresos - g.egresos).toFixed(2)}`} />
             </div>
-          </div>
+          </ItemCard>
         ))}
-        {grupos.size === 0 && (
-          <p className="text-sm text-muted-foreground">Todavía no hay movimientos.</p>
-        )}
+        {grupos.size === 0 && <EmptyState>Todavía no hay movimientos.</EmptyState>}
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold">Morosos</h2>
+        <SectionLabel count={morosos?.length ?? 0}>Morosos</SectionLabel>
         {(morosos ?? []).map((c) => (
-          <div key={c.id} className="flex flex-wrap items-center gap-2 rounded-lg border p-3 text-sm">
-            <span>
+          <ItemCard key={c.id} className="flex flex-wrap items-center gap-2 space-y-0 py-3">
+            <span className="text-sm">
               {c.socio
                 ? `#${c.socio.numero_socio} ${c.socio.usuario?.nombre} ${c.socio.usuario?.apellido}`
                 : `Grupo ${c.grupo_familiar?.nombre}`}
             </span>
-            <Badge variant="secondary">
-              {c.tipo === 'actividad' ? c.area?.nombre : 'Social'}
-            </Badge>
-            <span className="text-muted-foreground">{c.periodo}</span>
-            <span className="ml-auto font-mono">${c.monto}</span>
+            <Badge variant="secondary">{c.tipo === 'actividad' ? c.area?.nombre : 'Social'}</Badge>
+            <span className="text-sm text-muted-foreground">{c.periodo}</span>
+            <span className="ml-auto font-mono text-sm font-semibold">${c.monto}</span>
             <span className="text-xs text-destructive">venció {c.vencimiento}</span>
-          </div>
+          </ItemCard>
         ))}
-        {(morosos?.length ?? 0) === 0 && (
-          <p className="text-sm text-muted-foreground">No hay cuotas vencidas impagas.</p>
-        )}
+        {(morosos?.length ?? 0) === 0 && <EmptyState>No hay cuotas vencidas impagas.</EmptyState>}
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-display text-lg font-semibold">Estado de cuenta de un socio</h2>
-        <form method="GET" className="flex flex-col gap-2">
-          <SocioPicker name="socio_id" />
+        <SectionLabel>Estado de cuenta de un socio</SectionLabel>
+        <form method="GET" className="flex items-end gap-2 rounded-xl border p-4">
+          <div className="flex-1 space-y-1">
+            <label className="flex items-center gap-1.5 text-sm font-medium">
+              <Search className="size-3.5 text-muted-foreground" /> Buscar socio
+            </label>
+            <SocioPicker name="socio_id" />
+          </div>
           <Button type="submit" size="sm" variant="outline" className="w-auto">
             Ver cuenta
           </Button>
         </form>
 
-        {socioId && !cuentaSocio && (
-          <p className="text-sm text-muted-foreground">No se encontró ese socio.</p>
-        )}
+        {socioId && !cuentaSocio && <EmptyState>No se encontró ese socio.</EmptyState>}
 
         {cuentaSocio && (
-          <div className="space-y-2">
-            <p className="font-medium">
-              #{cuentaSocio.numero_socio} {cuentaSocio.usuario?.nombre}{' '}
-              {cuentaSocio.usuario?.apellido}
+          <div className="space-y-3">
+            <p className="font-display text-lg font-semibold">
+              #{cuentaSocio.numero_socio} {cuentaSocio.usuario?.nombre} {cuentaSocio.usuario?.apellido}
             </p>
             {cuotasSocio.map((c) => (
-              <div key={c.id} className="flex items-center gap-2 rounded-lg border p-3 text-sm">
-                <span>{c.tipo === 'actividad' ? c.area?.nombre : 'Social'}</span>
-                <span className="text-muted-foreground">{c.periodo}</span>
+              <ItemCard key={c.id} className="flex items-center gap-2 space-y-0 py-3">
+                <span className="text-sm">{c.tipo === 'actividad' ? c.area?.nombre : 'Social'}</span>
+                <span className="text-sm text-muted-foreground">{c.periodo}</span>
                 <Badge variant={ESTADO_VARIANT[c.estado]}>{c.estado}</Badge>
-                <span className="ml-auto font-mono">${c.monto}</span>
-              </div>
+                <span className="ml-auto font-mono text-sm font-semibold">${c.monto}</span>
+              </ItemCard>
             ))}
-            {cuotasSocio.length === 0 && (
-              <p className="text-sm text-muted-foreground">No tiene cuotas individuales.</p>
-            )}
+            {cuotasSocio.length === 0 && <EmptyState>No tiene cuotas individuales.</EmptyState>}
           </div>
         )}
       </section>

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader, NuevoCard, SectionLabel, ItemCard, EmptyState } from '@/components/admin/kit';
 
 export default async function ComisionesPage() {
   const supabase = await createClient();
@@ -23,32 +24,30 @@ export default async function ComisionesPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">Comisiones</h1>
-        <p className="text-sm text-muted-foreground">
-          La Comisión Directiva General tiene alcance global. Las subcomisiones
-          gestionan solo las áreas que se les asignen acá abajo.
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <PageHeader
+        eyebrow="Administración"
+        title="Comisiones"
+        description="La Comisión Directiva General tiene alcance global. Las subcomisiones gestionan solo las áreas que se les asignen acá abajo."
+      />
 
-      <NuevaComisionForm />
+      <NuevoCard title="Nueva comisión">
+        <NuevaComisionForm />
+      </NuevoCard>
 
-      <div className="space-y-6">
+      <div className="space-y-3">
+        <SectionLabel count={comisiones?.length ?? 0}>Comisiones cargadas</SectionLabel>
         {(comisiones ?? []).map((comision) => {
           const areasAsignadas = areasPorComision.get(comision.id) ?? new Set<string>();
 
           return (
-            <div key={comision.id} className="space-y-4 rounded-lg border p-4">
+            <ItemCard key={comision.id} className="space-y-5">
               <div className="flex items-center gap-2">
-                <h2 className="font-display text-lg font-semibold">{comision.nombre}</h2>
+                <p className="font-display text-lg font-semibold">{comision.nombre}</p>
                 {comision.es_directiva && <Badge>CD General</Badge>}
               </div>
 
-              <form
-                action={actualizarComision.bind(null, comision.id)}
-                className="space-y-3"
-              >
+              <form action={actualizarComision.bind(null, comision.id)} className="space-y-3">
                 <div className="space-y-1">
                   <label className="text-sm font-medium">Nombre</label>
                   <Input name="nombre" defaultValue={comision.nombre} required />
@@ -56,21 +55,11 @@ export default async function ComisionesPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1">
                     <label className="text-sm font-medium">Mandato desde</label>
-                    <Input
-                      name="mandato_desde"
-                      type="date"
-                      defaultValue={comision.mandato_desde}
-                      required
-                    />
+                    <Input name="mandato_desde" type="date" defaultValue={comision.mandato_desde} required />
                   </div>
                   <div className="space-y-1">
                     <label className="text-sm font-medium">Mandato hasta</label>
-                    <Input
-                      name="mandato_hasta"
-                      type="date"
-                      defaultValue={comision.mandato_hasta}
-                      required
-                    />
+                    <Input name="mandato_hasta" type="date" defaultValue={comision.mandato_hasta} required />
                   </div>
                 </div>
                 <label className="flex items-center gap-2 text-sm">
@@ -83,19 +72,12 @@ export default async function ComisionesPage() {
               </form>
 
               {!comision.es_directiva && (
-                <form
-                  action={actualizarAreasComision.bind(null, comision.id)}
-                  className="space-y-2 border-t pt-4"
-                >
+                <form action={actualizarAreasComision.bind(null, comision.id)} className="space-y-3 border-t pt-4">
                   <p className="text-sm font-medium">Áreas que gestiona</p>
                   <div className="flex flex-wrap gap-4">
                     {(areas ?? []).map((area) => (
                       <label key={area.id} className="flex items-center gap-2 text-sm">
-                        <Checkbox
-                          name="area_ids"
-                          value={area.id}
-                          defaultChecked={areasAsignadas.has(area.id)}
-                        />
+                        <Checkbox name="area_ids" value={area.id} defaultChecked={areasAsignadas.has(area.id)} />
                         {area.nombre}
                       </label>
                     ))}
@@ -108,12 +90,10 @@ export default async function ComisionesPage() {
                   </Button>
                 </form>
               )}
-            </div>
+            </ItemCard>
           );
         })}
-        {comisiones?.length === 0 && (
-          <p className="text-sm text-muted-foreground">Todavía no hay comisiones cargadas.</p>
-        )}
+        {comisiones?.length === 0 && <EmptyState>Todavía no hay comisiones cargadas.</EmptyState>}
       </div>
     </div>
   );

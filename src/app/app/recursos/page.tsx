@@ -11,6 +11,8 @@ import { BloqueoForm } from './bloqueo-form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { PageHeader, NuevoCard, SectionLabel, ItemCard, EmptyState } from '@/components/admin/kit';
 
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -68,23 +70,31 @@ export default async function RecursosPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight">Recursos</h1>
-        <p className="text-sm text-muted-foreground">
-          Canchas, quincho, lo que se reserve. Cada uno con su precio, su
-          aprobación (automática o manual) y su ventana de cancelación.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Gestión"
+        title="Recursos"
+        description="Canchas, quincho, lo que se reserve. Cada uno con su precio, su aprobación (automática o manual) y su ventana de cancelación."
+      />
 
-      <NuevoRecursoForm areas={areas} />
+      <NuevoCard title="Nuevo recurso">
+        <NuevoRecursoForm areas={areas} />
+      </NuevoCard>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
+        <SectionLabel count={recursos?.length ?? 0}>Recursos</SectionLabel>
         {(recursos ?? []).map((r) => {
           const disp = dispPorRecurso.get(r.id) ?? [];
           const blq = bloqueosPorRecurso.get(r.id) ?? [];
 
           return (
-            <div key={r.id} className="space-y-4 rounded-lg border p-4">
+            <ItemCard key={r.id} className="space-y-5">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-display text-lg font-semibold">{r.nombre}</p>
+                {!r.activo && <Badge variant="secondary">Inactivo</Badge>}
+                <Badge variant="outline">{r.aprobacion_automatica ? 'Aprobación automática' : 'Aprobación manual'}</Badge>
+                <Badge variant="outline">{r.duracion_minutos} min</Badge>
+              </div>
+
               <form action={actualizarRecurso.bind(null, r.id)} className="space-y-3">
                 <div className="space-y-1">
                   <label className="text-sm font-medium">Nombre</label>
@@ -108,7 +118,7 @@ export default async function RecursosPage() {
                     <Input name="horas_cancelacion" type="number" min="0" defaultValue={r.horas_cancelacion} />
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-6 text-sm">
+                <div className="flex flex-wrap items-center gap-6 border-t pt-3 text-sm">
                   <label className="flex items-center gap-2">
                     <Checkbox name="aprobacion_automatica" defaultChecked={r.aprobacion_automatica} />
                     Aprobación automática
@@ -163,12 +173,10 @@ export default async function RecursosPage() {
                 </ul>
                 <BloqueoForm recursoId={r.id} />
               </div>
-            </div>
+            </ItemCard>
           );
         })}
-        {(recursos?.length ?? 0) === 0 && (
-          <p className="text-sm text-muted-foreground">Todavía no hay recursos cargados.</p>
-        )}
+        {(recursos?.length ?? 0) === 0 && <EmptyState>Todavía no hay recursos cargados.</EmptyState>}
       </div>
     </div>
   );
