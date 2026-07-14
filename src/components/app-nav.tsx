@@ -8,6 +8,7 @@ type Props = {
   nombreCompleto: string;
   esDirectiva: boolean;
   cargos: { etiqueta: string; esDirectiva: boolean }[];
+  tieneAreasGestionadas: boolean;
 };
 
 function CredentialPill({
@@ -29,32 +30,74 @@ function CredentialPill({
   );
 }
 
-export function AppNav({ nombreCompleto, esDirectiva, cargos }: Props) {
+const ADMIN_LINKS = [
+  { href: '/app/admin/areas', label: 'Áreas' },
+  { href: '/app/admin/comisiones', label: 'Comisiones' },
+  { href: '/app/admin/cargos', label: 'Cargos' },
+  { href: '/app/admin/socios', label: 'Socios' },
+  { href: '/app/admin/grupos-familiares', label: 'Grupos familiares' },
+];
+
+export function AppNav({ nombreCompleto, esDirectiva, cargos, tieneAreasGestionadas }: Props) {
+  const mostrarInscripciones = esDirectiva || tieneAreasGestionadas;
+
   return (
-    <header className="flex items-center justify-between bg-ink px-4 py-3 text-paper sm:px-6">
-      <Link href="/app" className="flex items-center gap-2.5">
-        <Image src={club.logo} alt="" width={28} height={28} className="rounded" />
-        <span className="font-display text-lg font-bold tracking-wide uppercase">
-          {club.nombreCorto}
-        </span>
-      </Link>
+    <header className="flex flex-col gap-2 bg-ink px-4 py-3 text-paper sm:px-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link href="/app" className="flex items-center gap-2.5">
+            <Image src={club.logo} alt="" width={28} height={28} className="rounded" />
+            <span className="font-display text-lg font-bold tracking-wide uppercase">
+              {club.nombreCorto}
+            </span>
+          </Link>
 
-      <div className="flex items-center gap-3">
-        {esDirectiva && <CredentialPill highlight>Comisión Directiva</CredentialPill>}
-        {!esDirectiva &&
-          cargos.map((c) => <CredentialPill key={c.etiqueta}>{c.etiqueta}</CredentialPill>)}
+          <nav className="hidden items-center gap-4 font-mono text-xs tracking-wide text-paper/75 uppercase md:flex">
+            {esDirectiva &&
+              ADMIN_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className="hover:text-paper">
+                  {link.label}
+                </Link>
+              ))}
+            {mostrarInscripciones && (
+              <Link href="/app/inscripciones" className="hover:text-paper">
+                Inscripciones
+              </Link>
+            )}
+          </nav>
+        </div>
 
-        <span className="hidden text-sm text-paper/70 sm:inline">{nombreCompleto}</span>
+        <div className="flex items-center gap-3">
+          {esDirectiva && <CredentialPill highlight>Comisión Directiva</CredentialPill>}
+          {!esDirectiva &&
+            cargos.map((c) => <CredentialPill key={c.etiqueta}>{c.etiqueta}</CredentialPill>)}
 
-        <form action={logout}>
-          <button
-            type="submit"
-            className="rounded-md border border-paper/20 px-3 py-1.5 text-sm text-paper/90 transition-colors hover:border-paper/40 hover:bg-paper/10"
-          >
-            Salir
-          </button>
-        </form>
+          <span className="hidden text-sm text-paper/70 sm:inline">{nombreCompleto}</span>
+
+          <form action={logout}>
+            <button
+              type="submit"
+              className="rounded-md border border-paper/20 px-3 py-1.5 text-sm text-paper/90 transition-colors hover:border-paper/40 hover:bg-paper/10"
+            >
+              Salir
+            </button>
+          </form>
+        </div>
       </div>
+
+      <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs tracking-wide text-paper/75 uppercase md:hidden">
+        {esDirectiva &&
+          ADMIN_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className="hover:text-paper">
+              {link.label}
+            </Link>
+          ))}
+        {mostrarInscripciones && (
+          <Link href="/app/inscripciones" className="hover:text-paper">
+            Inscripciones
+          </Link>
+        )}
+      </nav>
     </header>
   );
 }

@@ -828,6 +828,7 @@ export type Database = {
           apellido: string
           created_at: string
           dni: string | null
+          email: string | null
           fecha_nac: string | null
           foto_url: string | null
           id: string
@@ -839,6 +840,7 @@ export type Database = {
           apellido: string
           created_at?: string
           dni?: string | null
+          email?: string | null
           fecha_nac?: string | null
           foto_url?: string | null
           id: string
@@ -850,6 +852,7 @@ export type Database = {
           apellido?: string
           created_at?: string
           dni?: string | null
+          email?: string | null
           fecha_nac?: string | null
           foto_url?: string | null
           id?: string
