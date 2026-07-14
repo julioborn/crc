@@ -12,24 +12,29 @@ export async function agregarDisponibilidad(
   _prevState: DisponibilidadState,
   formData: FormData,
 ): Promise<DisponibilidadState> {
-  const diaSemana = Number(formData.get('dia_semana') ?? '');
+  const dias = formData.getAll('dias').map(Number);
   const horaDesde = String(formData.get('hora_desde') ?? '');
   const horaHasta = String(formData.get('hora_hasta') ?? '');
 
-  if (Number.isNaN(diaSemana) || !horaDesde || !horaHasta) {
-    return { error: 'Elegí día y horario.' };
+  if (dias.length === 0 || dias.some(Number.isNaN) || !horaDesde || !horaHasta) {
+    return { error: 'Elegí al menos un día y el horario.' };
   }
-  if (horaHasta <= horaDesde) {
-    return { error: 'El horario hasta tiene que ser posterior al desde.' };
+  // hora_hasta <= hora_desde es válido: significa que la franja cruza la
+  // medianoche (p. ej. 20:00 a 02:00). Solo una franja de largo cero es
+  // un error.
+  if (horaHasta === horaDesde) {
+    return { error: 'El horario "hasta" no puede ser igual al "desde".' };
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from('disponibilidad').insert({
-    recurso_id: recursoId,
-    dia_semana: diaSemana,
-    hora_desde: horaDesde,
-    hora_hasta: horaHasta,
-  });
+  const { error } = await supabase.from('disponibilidad').insert(
+    dias.map((diaSemana) => ({
+      recurso_id: recursoId,
+      dia_semana: diaSemana,
+      hora_desde: horaDesde,
+      hora_hasta: horaHasta,
+    })),
+  );
 
   if (error) {
     return { error: error.message };

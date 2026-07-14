@@ -1,4 +1,4 @@
-import { horaLocalAUtc } from './tz';
+import { horaLocalAUtc, sumarDiasLocal } from './tz';
 
 export type Franja = { dia_semana: number; hora_desde: string; hora_hasta: string };
 export type Ocupado = { inicio: string; fin: string };
@@ -6,14 +6,26 @@ export type Slot = { inicio: string; fin: string };
 export type EstadoCelda = 'libre' | 'ocupado' | 'bloqueado' | 'mio';
 export type Celda = Slot & { estado: EstadoCelda };
 
-function sumarMinutos(horaHHMM: string, minutos: number): string {
+function minutosDesdeMedianoche(horaHHMM: string): number {
   const [h, m] = horaHHMM.split(':').map(Number);
-  const total = h * 60 + m + minutos;
-  const hh = Math.floor(total / 60)
+  return h * 60 + m;
+}
+
+function formatoDesdeMinutos(minutos: number): string {
+  const hh = Math.floor(minutos / 60)
     .toString()
     .padStart(2, '0');
-  const mm = (total % 60).toString().padStart(2, '0');
+  const mm = (minutos % 60).toString().padStart(2, '0');
   return `${hh}:${mm}`;
+}
+
+/** Instante UTC para "minutos desde la medianoche de `fecha`" — puede
+ * superar 1440 (cruza a la fecha siguiente, o varias). */
+function instanteLocal(fecha: string, minutosTotales: number): string {
+  const dias = Math.floor(minutosTotales / 1440);
+  const horaHHMM = formatoDesdeMinutos(minutosTotales - dias * 1440);
+  const fechaAjustada = dias === 0 ? fecha : sumarDiasLocal(fecha, dias);
+  return horaLocalAUtc(fechaAjustada, horaHHMM);
 }
 
 function seSuperponen(aInicio: number, aFin: number, bInicio: number, bFin: number): boolean {
@@ -31,18 +43,19 @@ function generarCandidatos(fecha: string, duracionMinutos: number, franjas: Fran
   const slots: Slot[] = [];
 
   for (const franja of franjas.filter((f) => f.dia_semana === diaSemana)) {
-    let cursor = franja.hora_desde.slice(0, 5);
-    const finFranja = franja.hora_hasta.slice(0, 5);
+    const desdeMin = minutosDesdeMedianoche(franja.hora_desde.slice(0, 5));
+    let hastaMin = minutosDesdeMedianoche(franja.hora_hasta.slice(0, 5));
+    // hora_hasta <= hora_desde: la franja cruza la medianoche y termina
+    // al día siguiente (p. ej. pádel 08:30–02:30, fútbol 07:00–02:00).
+    if (hastaMin <= desdeMin) hastaMin += 24 * 60;
 
-    while (true) {
-      const siguiente = sumarMinutos(cursor, duracionMinutos);
-      if (siguiente > finFranja) break;
-
-      // hora_desde/hora_hasta son hora LOCAL del club — horaLocalAUtc hace
-      // la conversión real a UTC (antes se armaba "${fecha}T${cursor}:00Z",
-      // tratando la hora local como si ya fuera UTC).
-      slots.push({ inicio: horaLocalAUtc(fecha, cursor), fin: horaLocalAUtc(fecha, siguiente) });
-      cursor = siguiente;
+    let cursor = desdeMin;
+    while (cursor + duracionMinutos <= hastaMin) {
+      slots.push({
+        inicio: instanteLocal(fecha, cursor),
+        fin: instanteLocal(fecha, cursor + duracionMinutos),
+      });
+      cursor += duracionMinutos;
     }
   }
 
