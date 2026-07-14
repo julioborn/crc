@@ -879,6 +879,15 @@ export type Database = {
       emitir_cuotas: { Args: { p_periodo?: string }; Returns: number }
       es_directiva: { Args: never; Returns: boolean }
       es_mi_cuota: { Args: { p_cuota_id: string }; Returns: boolean }
+      horarios_ocupados: {
+        Args: { p_desde: string; p_hasta: string; p_recurso_ids: string[] }
+        Returns: {
+          es_mio: boolean
+          fin: string
+          inicio: string
+          recurso_id: string
+        }[]
+      }
       iniciar_pago_cuota: { Args: { p_cuota_id: string }; Returns: undefined }
       puede_cobrar: {
         Args: { p_cuota_id: string; p_turno_id: string }

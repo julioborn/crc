@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { club } from '@/config/club';
 import { logout } from '@/lib/auth/actions';
 import { cn } from '@/lib/utils';
+import { NavMenu } from '@/components/nav-menu';
 
 type Props = {
   nombreCompleto: string;
@@ -21,7 +22,7 @@ function CredentialPill({
   return (
     <span
       className={cn(
-        'rounded-full border px-2.5 py-1 font-mono text-[0.65rem] tracking-[0.12em] uppercase',
+        'hidden rounded-full border px-2.5 py-1 font-mono text-[0.65rem] tracking-[0.12em] uppercase sm:inline',
         highlight ? 'border-primary/40 bg-primary/15 text-primary' : 'border-paper/25 text-paper/75',
       )}
     >
@@ -30,96 +31,34 @@ function CredentialPill({
   );
 }
 
-const ADMIN_LINKS = [
-  { href: '/app/admin/areas', label: 'Áreas' },
-  { href: '/app/admin/comisiones', label: 'Comisiones' },
-  { href: '/app/admin/cargos', label: 'Cargos' },
-  { href: '/app/admin/socios', label: 'Socios' },
-  { href: '/app/admin/grupos-familiares', label: 'Grupos familiares' },
-  { href: '/app/admin/aranceles', label: 'Aranceles' },
-];
-
-const GESTION_LINKS = [
-  { href: '/app/inscripciones', label: 'Inscripciones' },
-  { href: '/app/cobros', label: 'Cobros' },
-  { href: '/app/egresos', label: 'Egresos' },
-  { href: '/app/reportes', label: 'Reportes' },
-  { href: '/app/recursos', label: 'Recursos' },
-  { href: '/app/panel-turnos', label: 'Panel de turnos' },
-];
-
-function NavLinks({ esDirectiva, mostrarGestion, className }: { esDirectiva: boolean; mostrarGestion: boolean; className: string }) {
-  return (
-    <nav className={className}>
-      <Link href="/app/mis-cuotas" className="hover:text-paper">
-        Mis cuotas
-      </Link>
-      <Link href="/app/reservar" className="hover:text-paper">
-        Reservar
-      </Link>
-      <Link href="/app/mis-turnos" className="hover:text-paper">
-        Mis turnos
-      </Link>
-      {esDirectiva &&
-        ADMIN_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} className="hover:text-paper">
-            {link.label}
-          </Link>
-        ))}
-      {mostrarGestion &&
-        GESTION_LINKS.map((link) => (
-          <Link key={link.href} href={link.href} className="hover:text-paper">
-            {link.label}
-          </Link>
-        ))}
-    </nav>
-  );
-}
-
 export function AppNav({ nombreCompleto, esDirectiva, cargos, tieneAreasGestionadas }: Props) {
-  const mostrarGestion = esDirectiva || tieneAreasGestionadas;
-
   return (
-    <header className="flex flex-col gap-2 bg-ink px-4 py-3 text-paper sm:px-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link href="/app" className="flex items-center gap-2.5">
-            <Image src={club.logo} alt="" width={28} height={28} className="rounded" />
-            <span className="font-display text-lg font-bold tracking-wide uppercase">
-              {club.nombreCorto}
-            </span>
-          </Link>
+    <header className="flex items-center justify-between bg-ink px-4 py-3 text-paper sm:px-6">
+      <Link href="/app" className="flex items-center gap-2.5">
+        <Image src={club.logo} alt="" width={28} height={28} className="rounded" />
+        <span className="font-display text-lg font-bold tracking-wide uppercase">
+          {club.nombreCorto}
+        </span>
+      </Link>
 
-          <NavLinks
-            esDirectiva={esDirectiva}
-            mostrarGestion={mostrarGestion}
-            className="hidden items-center gap-4 font-mono text-xs tracking-wide text-paper/75 uppercase md:flex"
-          />
-        </div>
+      <div className="flex items-center gap-2 sm:gap-3">
+        {esDirectiva && <CredentialPill highlight>Comisión Directiva</CredentialPill>}
+        {!esDirectiva &&
+          cargos.map((c) => <CredentialPill key={c.etiqueta}>{c.etiqueta}</CredentialPill>)}
 
-        <div className="flex items-center gap-3">
-          {esDirectiva && <CredentialPill highlight>Comisión Directiva</CredentialPill>}
-          {!esDirectiva &&
-            cargos.map((c) => <CredentialPill key={c.etiqueta}>{c.etiqueta}</CredentialPill>)}
+        <span className="hidden text-sm text-paper/70 md:inline">{nombreCompleto}</span>
 
-          <span className="hidden text-sm text-paper/70 sm:inline">{nombreCompleto}</span>
+        <NavMenu esDirectiva={esDirectiva} mostrarGestion={esDirectiva || tieneAreasGestionadas} />
 
-          <form action={logout}>
-            <button
-              type="submit"
-              className="rounded-md border border-paper/20 px-3 py-1.5 text-sm text-paper/90 transition-colors hover:border-paper/40 hover:bg-paper/10"
-            >
-              Salir
-            </button>
-          </form>
-        </div>
+        <form action={logout}>
+          <button
+            type="submit"
+            className="rounded-md border border-paper/20 px-3 py-1.5 text-sm text-paper/90 transition-colors hover:border-paper/40 hover:bg-paper/10"
+          >
+            Salir
+          </button>
+        </form>
       </div>
-
-      <NavLinks
-        esDirectiva={esDirectiva}
-        mostrarGestion={mostrarGestion}
-        className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs tracking-wide text-paper/75 uppercase md:hidden"
-      />
     </header>
   );
 }

@@ -48,6 +48,11 @@ export function hoyLocal(): string {
   return DateTime.now().setZone(ZONA_CLUB).toFormat('yyyy-LL-dd');
 }
 
+/** Suma (o resta, con negativos) días a una fecha-calendario. */
+export function sumarDiasLocal(fechaISO: string, dias: number): string {
+  return DateTime.fromISO(fechaISO, { zone: ZONA_CLUB }).plus({ days: dias }).toFormat('yyyy-LL-dd');
+}
+
 export function formatearHoraLocal(instanteUtc: string): string {
   return DateTime.fromISO(instanteUtc, { zone: 'utc' }).setZone(ZONA_CLUB).toFormat('HH:mm');
 }
