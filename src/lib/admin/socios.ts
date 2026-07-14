@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { emitirCuotasDelMes } from '@/lib/cuotas/periodo';
 
 export type SocioState = { error: string | null };
 
@@ -46,6 +47,12 @@ export async function altaSocio(
   if (error) {
     return { error: error.message };
   }
+
+  // Si la fecha de alta ya cae en el período actual, la cuota social se
+  // emite ahora — no hay que esperar al cron del día 1. Si es futura, esto
+  // no hace nada (emitir_cuotas ya filtra por fecha_alta) y la toma el
+  // cron cuando llegue el mes.
+  await emitirCuotasDelMes(supabase);
 
   revalidatePath('/app/admin/socios');
   return { error: null };

@@ -36,10 +36,40 @@ const ADMIN_LINKS = [
   { href: '/app/admin/cargos', label: 'Cargos' },
   { href: '/app/admin/socios', label: 'Socios' },
   { href: '/app/admin/grupos-familiares', label: 'Grupos familiares' },
+  { href: '/app/admin/aranceles', label: 'Aranceles' },
 ];
 
+const GESTION_LINKS = [
+  { href: '/app/inscripciones', label: 'Inscripciones' },
+  { href: '/app/cobros', label: 'Cobros' },
+  { href: '/app/egresos', label: 'Egresos' },
+  { href: '/app/reportes', label: 'Reportes' },
+];
+
+function NavLinks({ esDirectiva, mostrarGestion, className }: { esDirectiva: boolean; mostrarGestion: boolean; className: string }) {
+  return (
+    <nav className={className}>
+      <Link href="/app/mis-cuotas" className="hover:text-paper">
+        Mis cuotas
+      </Link>
+      {esDirectiva &&
+        ADMIN_LINKS.map((link) => (
+          <Link key={link.href} href={link.href} className="hover:text-paper">
+            {link.label}
+          </Link>
+        ))}
+      {mostrarGestion &&
+        GESTION_LINKS.map((link) => (
+          <Link key={link.href} href={link.href} className="hover:text-paper">
+            {link.label}
+          </Link>
+        ))}
+    </nav>
+  );
+}
+
 export function AppNav({ nombreCompleto, esDirectiva, cargos, tieneAreasGestionadas }: Props) {
-  const mostrarInscripciones = esDirectiva || tieneAreasGestionadas;
+  const mostrarGestion = esDirectiva || tieneAreasGestionadas;
 
   return (
     <header className="flex flex-col gap-2 bg-ink px-4 py-3 text-paper sm:px-6">
@@ -52,19 +82,11 @@ export function AppNav({ nombreCompleto, esDirectiva, cargos, tieneAreasGestiona
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-4 font-mono text-xs tracking-wide text-paper/75 uppercase md:flex">
-            {esDirectiva &&
-              ADMIN_LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="hover:text-paper">
-                  {link.label}
-                </Link>
-              ))}
-            {mostrarInscripciones && (
-              <Link href="/app/inscripciones" className="hover:text-paper">
-                Inscripciones
-              </Link>
-            )}
-          </nav>
+          <NavLinks
+            esDirectiva={esDirectiva}
+            mostrarGestion={mostrarGestion}
+            className="hidden items-center gap-4 font-mono text-xs tracking-wide text-paper/75 uppercase md:flex"
+          />
         </div>
 
         <div className="flex items-center gap-3">
@@ -85,19 +107,11 @@ export function AppNav({ nombreCompleto, esDirectiva, cargos, tieneAreasGestiona
         </div>
       </div>
 
-      <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs tracking-wide text-paper/75 uppercase md:hidden">
-        {esDirectiva &&
-          ADMIN_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-paper">
-              {link.label}
-            </Link>
-          ))}
-        {mostrarInscripciones && (
-          <Link href="/app/inscripciones" className="hover:text-paper">
-            Inscripciones
-          </Link>
-        )}
-      </nav>
+      <NavLinks
+        esDirectiva={esDirectiva}
+        mostrarGestion={mostrarGestion}
+        className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs tracking-wide text-paper/75 uppercase md:hidden"
+      />
     </header>
   );
 }

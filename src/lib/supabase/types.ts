@@ -866,14 +866,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cerrar_y_crear_arancel: {
+        Args: {
+          p_area_id: string | null
+          p_monto: number
+          p_tipo: string
+          p_vigente_desde: string
+        }
+        Returns: string
+      }
+      comision_responsable: { Args: { p_area_id: string | null }; Returns: string }
       emitir_cuotas: { Args: { p_periodo?: string }; Returns: number }
       es_directiva: { Args: never; Returns: boolean }
       es_mi_cuota: { Args: { p_cuota_id: string }; Returns: boolean }
+      iniciar_pago_cuota: { Args: { p_cuota_id: string }; Returns: undefined }
       puede_cobrar: {
         Args: { p_cuota_id: string; p_turno_id: string }
         Returns: boolean
       }
       puede_gestionar_area: { Args: { p_area_id: string }; Returns: boolean }
+      tiene_cargo_vigente: { Args: never; Returns: boolean }
     }
     Enums: {
       aviso_alcance: "global" | "area"

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { emitirCuotasDelMes } from '@/lib/cuotas/periodo';
 
 export type InscripcionState = { error: string | null };
 
@@ -32,6 +33,10 @@ export async function inscribirSocio(
   if (error) {
     return { error: error.message };
   }
+
+  // Mismo criterio que en el alta de socio: si la inscripción ya cae en el
+  // período actual, el adicional se emite ahora en vez de esperar al cron.
+  await emitirCuotasDelMes(supabase);
 
   revalidatePath(PATH);
   return { error: null };
