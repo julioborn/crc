@@ -7,7 +7,6 @@ import { club } from '@/config/club';
 import { MembershipCard } from '@/components/membership-card';
 import { BotonPagarMP } from '@/components/boton-pagar-mp';
 import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button';
 import {
   CheckCircle,
   Clock,
@@ -17,14 +16,42 @@ import {
   Ticket,
   ArrowRight,
   ClipboardCheck,
+  ClipboardList,
   Banknote,
+  Receipt,
+  BarChart3,
+  LayoutGrid,
   Shield,
+  Layers,
+  Landmark,
+  IdCard,
+  Users,
+  UsersRound,
+  Tag,
 } from 'lucide-react';
 
 const ESTADO_LABEL: Record<string, string> = {
   pendiente_aprobacion: 'Pendiente de aprobación',
   confirmado: 'Confirmado',
 };
+
+const GESTION_ACCESOS = [
+  { href: '/app/inscripciones', icono: <ClipboardList className="size-5" />, label: 'Inscripciones' },
+  { href: '/app/cobros', icono: <Banknote className="size-5" />, label: 'Cobros' },
+  { href: '/app/egresos', icono: <Receipt className="size-5" />, label: 'Egresos' },
+  { href: '/app/reportes', icono: <BarChart3 className="size-5" />, label: 'Reportes' },
+  { href: '/app/recursos', icono: <LayoutGrid className="size-5" />, label: 'Recursos' },
+  { href: '/app/panel-turnos', icono: <ClipboardCheck className="size-5" />, label: 'Panel de turnos' },
+];
+
+const ADMIN_ACCESOS = [
+  { href: '/app/admin/areas', icono: <Layers className="size-5" />, label: 'Áreas' },
+  { href: '/app/admin/comisiones', icono: <Landmark className="size-5" />, label: 'Comisiones' },
+  { href: '/app/admin/cargos', icono: <IdCard className="size-5" />, label: 'Cargos' },
+  { href: '/app/admin/socios', icono: <Users className="size-5" />, label: 'Socios' },
+  { href: '/app/admin/grupos-familiares', icono: <UsersRound className="size-5" />, label: 'Grupos familiares' },
+  { href: '/app/admin/aranceles', icono: <Tag className="size-5" />, label: 'Aranceles' },
+];
 
 function AccesoRapido({ href, icono, label }: { href: string; icono: React.ReactNode; label: string }) {
   return (
@@ -295,13 +322,16 @@ export default async function AppHomePage() {
           </div>
         )}
 
-        {/* Gestión — solo para quien tiene cargo */}
+        {/* Gestión — solo para quien tiene cargo. Va con todo: quien
+            administra un área o toda la Directiva no debería tener que
+            abrir el menú para llegar a lo que gestiona todos los días. */}
         {tieneCargo && (
-          <div className="space-y-3 rounded-lg border border-ink/15 bg-ink/[0.03] p-5 sm:col-span-2">
+          <div className="space-y-4 rounded-lg border border-ink/15 bg-ink/[0.03] p-5 sm:col-span-2 lg:col-span-3">
             <p className="flex items-center gap-1.5 font-mono text-xs tracking-widest text-muted-foreground uppercase">
               <Shield className="size-3.5" />
               {esDirectiva ? 'Comisión Directiva' : `Gestión · ${misAreas.map((a) => a.nombre).join(', ')}`}
             </p>
+
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/app/panel-turnos"
@@ -319,12 +349,25 @@ export default async function AppHomePage() {
                 {porCobrar} por cobrar
                 <ArrowRight className="size-3.5 text-muted-foreground" />
               </Link>
-              {esDirectiva && (
-                <Link href="/app/admin/areas" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-                  Administración
-                </Link>
-              )}
             </div>
+
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+              {GESTION_ACCESOS.map((g) => (
+                <AccesoRapido key={g.href} href={g.href} icono={g.icono} label={g.label} />
+              ))}
+            </div>
+
+            {esDirectiva && (
+              <>
+                <div className="h-px bg-ink/10" />
+                <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">Administración</p>
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+                  {ADMIN_ACCESOS.map((a) => (
+                    <AccesoRapido key={a.href} href={a.href} icono={a.icono} label={a.label} />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
