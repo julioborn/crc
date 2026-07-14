@@ -3,7 +3,7 @@ import { horaLocalAUtc, sumarDiasLocal } from './tz';
 export type Franja = { dia_semana: number; hora_desde: string; hora_hasta: string };
 export type Ocupado = { inicio: string; fin: string };
 export type Slot = { inicio: string; fin: string };
-export type EstadoCelda = 'libre' | 'ocupado' | 'bloqueado' | 'mio';
+export type EstadoCelda = 'libre' | 'ocupado' | 'bloqueado' | 'mio' | 'pasado';
 export type Celda = Slot & { estado: EstadoCelda };
 
 function minutosDesdeMedianoche(horaHHMM: string): number {
@@ -97,6 +97,9 @@ export function calcularCeldas(params: {
   // de otras personas y la grilla mostraría todo como libre.
   ocupados: { inicio: string; fin: string; es_mio: boolean }[];
   bloqueos: Ocupado[];
+  // Instante UTC "ahora" — un candidato que ya empezó no se puede
+  // reservar, aunque nadie lo haya ocupado.
+  ahoraUtc: string;
 }): Celda[] {
   const candidatos = generarCandidatos(params.fecha, params.duracionMinutos, params.franjas);
 
@@ -109,6 +112,7 @@ export function calcularCeldas(params: {
     inicio: new Date(b.inicio).getTime(),
     fin: new Date(b.fin).getTime(),
   }));
+  const ahoraMs = new Date(params.ahoraUtc).getTime();
 
   return candidatos.map((c) => {
     const inicioMs = new Date(c.inicio).getTime();
@@ -124,6 +128,8 @@ export function calcularCeldas(params: {
 
     const bloqueado = bloqueosMs.some((b) => seSuperponen(inicioMs, finMs, b.inicio, b.fin));
     if (bloqueado) return { ...c, estado: 'bloqueado' as const };
+
+    if (inicioMs < ahoraMs) return { ...c, estado: 'pasado' as const };
 
     return { ...c, estado: 'libre' as const };
   });

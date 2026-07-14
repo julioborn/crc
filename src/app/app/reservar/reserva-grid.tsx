@@ -24,6 +24,7 @@ const ESTILO_CELDA: Record<EstadoCelda, string> = {
   ocupado: 'border-transparent bg-muted text-muted-foreground cursor-not-allowed',
   bloqueado: 'border-transparent bg-ink/[0.06] text-muted-foreground cursor-not-allowed',
   mio: 'border-primary bg-primary/20 text-ink font-medium cursor-not-allowed',
+  pasado: 'border-transparent bg-transparent text-muted-foreground/40 cursor-not-allowed',
 };
 
 const LABEL_ESTADO: Record<EstadoCelda, string> = {
@@ -31,6 +32,7 @@ const LABEL_ESTADO: Record<EstadoCelda, string> = {
   ocupado: 'Ocupado',
   bloqueado: 'Bloqueado',
   mio: 'Tuyo',
+  pasado: 'Pasó',
 };
 
 function ConfirmarReserva({
@@ -178,6 +180,9 @@ export function ReservaGrid({
         </span>
         <span className="flex items-center gap-1.5">
           <span className="size-3 rounded-sm bg-ink/[0.08]" /> Bloqueado
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="size-3 rounded-sm border border-dashed border-muted-foreground/30" /> Pasó
         </span>
       </div>
 

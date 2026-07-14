@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { calcularCeldas, type Celda } from '@/lib/reservas/slots';
 import { hoyLocal, sumarDiasLocal, limitesDiaLocalUtc, formatearHoraLocal } from '@/lib/reservas/tz';
 import { ReservaGrid } from './reserva-grid';
+import { SelectorFecha } from './selector-fecha';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -96,6 +97,7 @@ export default async function ReservarPage({
             bloqueos: (bloqueos ?? [])
               .filter((b) => b.recurso_id === r.id)
               .map((b) => ({ inicio: b.desde, fin: b.hasta })),
+            ahoraUtc: new Date().toISOString(),
           }),
         );
       }
@@ -167,7 +169,7 @@ export default async function ReservarPage({
             <Link href={urlPara(sumarDiasLocal(fecha, 1))} className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'w-auto')}>
               Siguiente →
             </Link>
-            <span className="ml-2 font-mono text-sm text-muted-foreground">{fecha}</span>
+            <SelectorFecha areaId={areaSeleccionada.id} fecha={fecha} />
           </div>
 
           {recursos.length === 0 ? (

@@ -24,6 +24,9 @@ export async function reservarTurno(
   if (!recursoId || !inicio || !fin) {
     return { error: 'Falta información del turno.' };
   }
+  if (new Date(inicio).getTime() < Date.now()) {
+    return { error: 'Ese horario ya pasó. Elegí otro.' };
+  }
 
   const supabase = await createClient();
   const {
