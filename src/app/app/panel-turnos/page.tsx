@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { areasGestionadas, type CargoRow } from '@/lib/auth/roles';
+import { hoyLocal, limitesDiaLocalUtc, formatearFechaHoraLocal, formatearHoraLocal } from '@/lib/reservas/tz';
 import { aprobarTurno, rechazarTurno, marcarAusente } from '@/lib/admin/panel-turnos';
 import { CobrarTurnoForm } from './cobrar-turno-form';
 import { Button } from '@/components/ui/button';
@@ -61,10 +62,9 @@ export default async function PanelTurnosPage({
     .eq('estado', 'pendiente_aprobacion')
     .order('inicio');
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = hoyLocal();
   const fechaAgenda = fecha ?? hoy;
-  const inicioDia = `${fechaAgenda}T00:00:00Z`;
-  const finDia = `${fechaAgenda}T23:59:59Z`;
+  const { desde: inicioDia, hasta: finDia } = limitesDiaLocalUtc(fechaAgenda);
 
   const { data: agenda } = await supabase
     .from('turno')
@@ -93,9 +93,7 @@ export default async function PanelTurnosPage({
             <span className="text-muted-foreground">
               {t.usuario?.nombre} {t.usuario?.apellido}
             </span>
-            <span className="text-muted-foreground">
-              {new Date(t.inicio).toLocaleString('es-AR', { timeZone: 'UTC' })}
-            </span>
+            <span className="text-muted-foreground">{formatearFechaHoraLocal(t.inicio)}</span>
             <span className="font-mono">${t.precio}</span>
             <div className="ml-auto flex gap-2">
               <form action={aprobarTurno.bind(null, t.id)}>
@@ -140,8 +138,7 @@ export default async function PanelTurnosPage({
                 {t.usuario?.nombre} {t.usuario?.apellido}
               </span>
               <span className="text-muted-foreground">
-                {new Date(t.inicio).toLocaleTimeString('es-AR', { timeZone: 'UTC' })}–
-                {new Date(t.fin).toLocaleTimeString('es-AR', { timeZone: 'UTC' })}
+                {formatearHoraLocal(t.inicio)}–{formatearHoraLocal(t.fin)}
               </span>
               <Badge variant="secondary">{ESTADO_LABEL[t.estado]}</Badge>
               <Badge variant={t.cobrado ? 'default' : 'secondary'}>

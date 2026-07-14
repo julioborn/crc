@@ -4,6 +4,7 @@ import { areasGestionadas, type CargoRow } from '@/lib/auth/roles';
 import { actualizarRecurso } from '@/lib/admin/recursos';
 import { quitarDisponibilidad } from '@/lib/admin/disponibilidad';
 import { quitarBloqueo } from '@/lib/admin/bloqueos';
+import { formatearFechaHoraLocal } from '@/lib/reservas/tz';
 import { NuevoRecursoForm } from './nuevo-recurso-form';
 import { DisponibilidadForm } from './disponibilidad-form';
 import { BloqueoForm } from './bloqueo-form';
@@ -148,8 +149,7 @@ export default async function RecursosPage() {
                   {blq.map((b) => (
                     <li key={b.id} className="flex items-center gap-2">
                       <span>
-                        {new Date(b.desde).toLocaleString('es-AR')} —{' '}
-                        {new Date(b.hasta).toLocaleString('es-AR')}
+                        {formatearFechaHoraLocal(b.desde)} — {formatearFechaHoraLocal(b.hasta)}
                         {b.motivo ? ` (${b.motivo})` : ''}
                       </span>
                       <form action={quitarBloqueo.bind(null, b.id)}>

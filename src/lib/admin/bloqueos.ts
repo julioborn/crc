@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { datetimeLocalAUtc } from '@/lib/reservas/tz';
 
 export type BloqueoState = { error: string | null };
 
@@ -24,10 +25,14 @@ export async function crearBloqueo(
   }
 
   const supabase = await createClient();
+  // El <input type="datetime-local"> no lleva zona horaria — lo que el
+  // admin tipeó es hora del club, no UTC. Antes esto se guardaba tal
+  // cual, y la base (que interpreta timestamps sin offset como UTC) lo
+  // corría 3 horas.
   const { error } = await supabase.from('bloqueo').insert({
     recurso_id: recursoId,
-    desde,
-    hasta,
+    desde: datetimeLocalAUtc(desde),
+    hasta: datetimeLocalAUtc(hasta),
     motivo,
   });
 

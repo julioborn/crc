@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { hoyLocal } from './tz';
 
 export type ReservaState = { error: string | null };
 
@@ -42,7 +43,7 @@ export async function reservarTurno(
     return { error: 'Ese recurso ya no está disponible.' };
   }
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = hoyLocal();
   const { data: socio } = await supabase
     .from('socio')
     .select('id')

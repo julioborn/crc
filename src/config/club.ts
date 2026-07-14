@@ -10,6 +10,12 @@ export const club = {
   nombreCompleto: 'Centro Recreativo Calchaquí',
   logo: '/icon-512x512.png',
 
+  // El servidor corre en UTC (Vercel). Toda la lógica de horarios —
+  // disponibilidad, reservas, agenda, bloqueos, ventana de cancelación—
+  // tiene que convertir a/desde esta zona explícitamente. Nunca asumir
+  // la hora del servidor ni la del navegador del usuario.
+  timezone: 'America/Argentina/Buenos_Aires',
+
   // Se inyectan como CSS variables (ver src/components/club-theme.tsx)
   // y de ahí las toma el theme de Tailwind/shadcn. Cambiar el hex acá
   // cambia el color en toda la app, sin tocar un solo componente.

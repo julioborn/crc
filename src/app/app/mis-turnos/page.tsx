@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { formatearFechaHoraLocal, formatearHoraLocal } from '@/lib/reservas/tz';
 import { CancelarButton } from './cancelar-button';
 import { Badge } from '@/components/ui/badge';
 
@@ -49,8 +50,7 @@ export default async function MisTurnosPage() {
             <span className="font-normal text-muted-foreground">({t.recurso?.area?.nombre})</span>
           </p>
           <p className="text-muted-foreground">
-            {new Date(t.inicio).toLocaleString('es-AR', { timeZone: 'UTC' })} —{' '}
-            {new Date(t.fin).toLocaleTimeString('es-AR', { timeZone: 'UTC' })}
+            {formatearFechaHoraLocal(t.inicio)} — {formatearHoraLocal(t.fin)}
           </p>
         </div>
         <Badge variant={ESTADO_VARIANT[t.estado]}>{ESTADO_LABEL[t.estado]}</Badge>

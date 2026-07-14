@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { calcularSlotsLibres } from '@/lib/reservas/slots';
+import { hoyLocal, limitesDiaLocalUtc, formatearHoraLocal } from '@/lib/reservas/tz';
 import { SlotButton } from './slot-button';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,7 +31,7 @@ export default async function ReservarPage({
     .eq('activo', true)
     .order('nombre');
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = hoyLocal();
   const { data: miSocio } = await supabase
     .from('socio')
     .select('id')
@@ -44,8 +45,9 @@ export default async function ReservarPage({
   let slots: { inicio: string; fin: string }[] = [];
 
   if (recurso && fecha) {
-    const inicioDia = `${fecha}T00:00:00Z`;
-    const finDia = `${fecha}T23:59:59Z`;
+    // Límites del día LOCAL del club, no del día UTC — si no, un turno de
+    // las 22:00 (hora Argentina) queda comparado contra el día siguiente.
+    const { desde: inicioDia, hasta: finDia } = limitesDiaLocalUtc(fecha);
 
     const [{ data: franjas }, { data: turnos }, { data: bloqueos }] = await Promise.all([
       supabase.from('disponibilidad').select('dia_semana, hora_desde, hora_hasta').eq('recurso_id', recurso.id),
@@ -151,7 +153,7 @@ export default async function ReservarPage({
                 recursoId={recurso.id}
                 inicio={s.inicio}
                 fin={s.fin}
-                horaLabel={s.inicio.slice(11, 16)}
+                horaLabel={formatearHoraLocal(s.inicio)}
               />
             ))}
             {slots.length === 0 && (
