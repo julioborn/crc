@@ -1,9 +1,10 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useState } from 'react';
 import { reservarTurno, type ReservaState } from '@/lib/reservas/actions';
 import { formatearHoraLocal } from '@/lib/reservas/tz';
 import { SubmitButton } from '@/components/submit-button';
+import { PedirPermisoPush } from '@/components/notificaciones/pedir-permiso-push';
 import { cn } from '@/lib/utils';
 import type { Celda, EstadoCelda } from '@/lib/reservas/slots';
 
@@ -47,16 +48,30 @@ function ConfirmarReserva({
   onCerrar: () => void;
 }) {
   const [state, formAction] = useActionState(reservarTurno, initialState);
-
-  useEffect(() => {
-    if (state !== initialState && state.error === null) {
-      onCerrar();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
+  const reservado = state !== initialState && state.error === null;
 
   const precio = esSocio ? recurso.precio_socio : recurso.precio_no_socio;
   const precioOtro = esSocio ? recurso.precio_no_socio : recurso.precio_socio;
+
+  if (reservado) {
+    // No se cierra solo: se queda un momento para ofrecer el
+    // recordatorio de turno por push — el momento con más intención
+    // real para pedir el permiso, no al abrir la app.
+    return (
+      <div className="sticky bottom-4 z-20 mx-auto flex max-w-lg flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/40 bg-primary/5 p-4 shadow-lg">
+        <div>
+          <p className="font-medium">Turno reservado.</p>
+          <p className="text-sm text-muted-foreground">
+            {recurso.nombre} · {formatearHoraLocal(celda.inicio)}–{formatearHoraLocal(celda.fin)}
+          </p>
+          <PedirPermisoPush mensaje="Avisame antes de mi turno" className="mt-1" />
+        </div>
+        <button type="button" onClick={onCerrar} className="text-sm text-muted-foreground hover:underline">
+          Listo
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="sticky bottom-4 z-20 mx-auto flex max-w-lg flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/40 bg-card p-4 shadow-lg">

@@ -541,6 +541,80 @@ export type Database = {
           },
         ]
       }
+      notificacion: {
+        Row: {
+          aviso_id: string | null
+          categoria: Database["public"]["Enums"]["notificacion_categoria"]
+          created_at: string
+          cuerpo: string
+          cuota_id: string | null
+          deep_link: string | null
+          id: string
+          leida_at: string | null
+          push_enviado: boolean
+          titulo: string
+          turno_id: string | null
+          usuario_id: string
+        }
+        Insert: {
+          aviso_id?: string | null
+          categoria: Database["public"]["Enums"]["notificacion_categoria"]
+          created_at?: string
+          cuerpo: string
+          cuota_id?: string | null
+          deep_link?: string | null
+          id?: string
+          leida_at?: string | null
+          push_enviado?: boolean
+          titulo: string
+          turno_id?: string | null
+          usuario_id: string
+        }
+        Update: {
+          aviso_id?: string | null
+          categoria?: Database["public"]["Enums"]["notificacion_categoria"]
+          created_at?: string
+          cuerpo?: string
+          cuota_id?: string | null
+          deep_link?: string | null
+          id?: string
+          leida_at?: string | null
+          push_enviado?: boolean
+          titulo?: string
+          turno_id?: string | null
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_aviso_id_fkey"
+            columns: ["aviso_id"]
+            isOneToOne: false
+            referencedRelation: "aviso"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_cuota_id_fkey"
+            columns: ["cuota_id"]
+            isOneToOne: false
+            referencedRelation: "cuota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_turno_id_fkey"
+            columns: ["turno_id"]
+            isOneToOne: false
+            referencedRelation: "turno"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pago: {
         Row: {
           comprobante_url: string | null
@@ -591,20 +665,46 @@ export type Database = {
           {
             foreignKeyName: "fk_pago_turno"
             columns: ["turno_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "turno"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "pago_cuota_id_fkey"
             columns: ["cuota_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "cuota"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "pago_registrado_por_fkey"
             columns: ["registrado_por"]
+            isOneToOne: false
+            referencedRelation: "usuario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      preferencia_notificacion: {
+        Row: {
+          categoria: Database["public"]["Enums"]["notificacion_categoria"]
+          habilitada: boolean
+          usuario_id: string
+        }
+        Insert: {
+          categoria: Database["public"]["Enums"]["notificacion_categoria"]
+          habilitada?: boolean
+          usuario_id: string
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["notificacion_categoria"]
+          habilitada?: boolean
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preferencia_notificacion_usuario_id_fkey"
+            columns: ["usuario_id"]
             isOneToOne: false
             referencedRelation: "usuario"
             referencedColumns: ["id"]
@@ -868,17 +968,18 @@ export type Database = {
     Functions: {
       cerrar_y_crear_arancel: {
         Args: {
-          p_area_id: string | null
+          p_area_id: string
           p_monto: number
           p_tipo: string
           p_vigente_desde: string
         }
         Returns: string
       }
-      comision_responsable: { Args: { p_area_id: string | null }; Returns: string }
+      comision_responsable: { Args: { p_area_id: string }; Returns: string }
       emitir_cuotas: { Args: { p_periodo?: string }; Returns: number }
       es_directiva: { Args: never; Returns: boolean }
       es_mi_cuota: { Args: { p_cuota_id: string }; Returns: boolean }
+      generar_notificaciones_programadas: { Args: never; Returns: undefined }
       horarios_ocupados: {
         Args: { p_desde: string; p_hasta: string; p_recurso_ids: string[] }
         Returns: {
@@ -889,6 +990,7 @@ export type Database = {
         }[]
       }
       iniciar_pago_cuota: { Args: { p_cuota_id: string }; Returns: undefined }
+      procesar_notificaciones_cron: { Args: never; Returns: undefined }
       puede_cobrar: {
         Args: { p_cuota_id: string; p_turno_id: string }
         Returns: boolean
@@ -911,6 +1013,15 @@ export type Database = {
       cuota_tipo: "social" | "actividad"
       metodo_pago: "mercadopago" | "efectivo" | "transferencia"
       movimiento_tipo: "ingreso" | "egreso"
+      notificacion_categoria:
+        | "aviso"
+        | "cuota_emitida"
+        | "cuota_por_vencer"
+        | "cuota_vencida"
+        | "turno_confirmado"
+        | "turno_rechazado"
+        | "recordatorio_turno"
+        | "pago_acreditado"
       turno_estado:
         | "pendiente_aprobacion"
         | "confirmado"
@@ -1059,6 +1170,16 @@ export const Constants = {
       cuota_tipo: ["social", "actividad"],
       metodo_pago: ["mercadopago", "efectivo", "transferencia"],
       movimiento_tipo: ["ingreso", "egreso"],
+      notificacion_categoria: [
+        "aviso",
+        "cuota_emitida",
+        "cuota_por_vencer",
+        "cuota_vencida",
+        "turno_confirmado",
+        "turno_rechazado",
+        "recordatorio_turno",
+        "pago_acreditado",
+      ],
       turno_estado: [
         "pendiente_aprobacion",
         "confirmado",

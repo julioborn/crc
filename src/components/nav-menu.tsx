@@ -15,6 +15,8 @@ const GENERAL_LINKS = [
   { href: '/app/mis-cuotas', label: 'Mis cuotas' },
   { href: '/app/reservar', label: 'Reservar' },
   { href: '/app/mis-turnos', label: 'Mis turnos' },
+  { href: '/app/avisos', label: 'Avisos' },
+  { href: '/app/notificaciones', label: 'Notificaciones' },
 ];
 
 const GESTION_LINKS = [

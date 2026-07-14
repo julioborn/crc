@@ -58,9 +58,17 @@ export function SectionLabel({ children, count }: { children: ReactNode; count?:
   );
 }
 
-export function ItemCard({ children, className }: { children: ReactNode; className?: string }) {
+export function ItemCard({
+  children,
+  className,
+  id,
+}: {
+  children: ReactNode;
+  className?: string;
+  id?: string;
+}) {
   return (
-    <div className={cn('space-y-3 rounded-xl border p-5 transition-colors hover:border-primary/20', className)}>
+    <div id={id} className={cn('space-y-3 rounded-xl border p-5 transition-colors hover:border-primary/20', className)}>
       {children}
     </div>
   );

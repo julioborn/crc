@@ -29,6 +29,7 @@ import {
   Users,
   UsersRound,
   Tag,
+  Bell,
 } from 'lucide-react';
 
 const ESTADO_LABEL: Record<string, string> = {
@@ -112,7 +113,7 @@ export default async function AppHomePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const [{ data: usuario }, { data: esDirectiva }, { data: cargos }, { data: miSocio }, { data: avisos }] =
+  const [{ data: usuario }, { data: esDirectiva }, { data: cargos }, { data: miSocio }, { data: avisos }, { count: notificacionesSinLeer }] =
     await Promise.all([
       supabase.from('usuario').select('nombre, apellido').eq('id', user.id).single(),
       supabase.rpc('es_directiva'),
@@ -126,6 +127,11 @@ export default async function AppHomePage() {
         .eq('usuario_id', user.id),
       supabase.from('socio').select('id, numero_socio, grupo_familiar_id').eq('usuario_id', user.id).maybeSingle(),
       supabase.from('aviso').select('id, titulo, cuerpo, created_at').order('created_at', { ascending: false }).limit(3),
+      supabase
+        .from('notificacion')
+        .select('id', { count: 'exact', head: true })
+        .eq('usuario_id', user.id)
+        .is('leida_at', null),
     ]);
 
   const cargosData = (cargos ?? []) as unknown as CargoRow[];
@@ -316,22 +322,37 @@ export default async function AppHomePage() {
             <AccesoRapido href="/app/reservar" icono={<CalendarDays className="size-5" />} label="Reservar" />
             <AccesoRapido href="/app/mis-cuotas" icono={<Wallet className="size-5" />} label="Mis cuotas" />
             <AccesoRapido href="/app/mis-turnos" icono={<Ticket className="size-5" />} label="Mis turnos" />
+            <div className="relative flex-1">
+              <AccesoRapido href="/app/notificaciones" icono={<Bell className="size-5" />} label="Notificaciones" />
+              {!!notificacionesSinLeer && (
+                <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-destructive font-mono text-[0.6rem] text-white">
+                  {notificacionesSinLeer > 9 ? '9+' : notificacionesSinLeer}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Avisos */}
         <div className="space-y-3 rounded-lg border p-5 sm:col-span-2 lg:col-span-1">
-          <p className="flex items-center gap-1.5 font-mono text-xs tracking-widest text-muted-foreground uppercase">
-            <Megaphone className="size-3.5" /> Avisos
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="flex items-center gap-1.5 font-mono text-xs tracking-widest text-muted-foreground uppercase">
+              <Megaphone className="size-3.5" /> Avisos
+            </p>
+            <Link href="/app/avisos" className="text-xs text-muted-foreground hover:underline">
+              Ver todos
+            </Link>
+          </div>
           {(avisos ?? []).length === 0 && (
             <p className="text-sm text-muted-foreground">Sin avisos por ahora.</p>
           )}
           <ul className="space-y-2">
             {(avisos ?? []).map((a) => (
               <li key={a.id}>
-                <p className="text-sm font-medium">{a.titulo}</p>
-                <p className="line-clamp-1 text-xs text-muted-foreground">{a.cuerpo}</p>
+                <Link href={`/app/avisos?id=${a.id}`} className="block hover:underline">
+                  <p className="text-sm font-medium">{a.titulo}</p>
+                  <p className="line-clamp-1 text-xs text-muted-foreground">{a.cuerpo}</p>
+                </Link>
               </li>
             ))}
           </ul>

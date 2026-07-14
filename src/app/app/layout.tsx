@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { cargosVigentes, areasGestionadas, type CargoRow } from '@/lib/auth/roles';
 import { AppNav } from '@/components/app-nav';
+import { PushListener } from '@/components/notificaciones/push-listener';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -36,6 +37,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen flex-col">
+      <PushListener />
       <AppNav
         nombreCompleto={nombreCompleto}
         esDirectiva={!!esDirectiva}

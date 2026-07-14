@@ -39,9 +39,12 @@ export async function crearArancel(
   // (CD-only) es el gate real, y PostgREST ejecuta el RPC en una sola
   // transacción, así que el cierre del vigente + el alta del nuevo son
   // atómicos sin trucos extra acá.
+  // El generador de tipos marca p_area_id como no-nulo, pero la función
+  // (uuid sin NOT NULL) acepta null sin problema — social/social
+  // familiar no llevan área.
   const { error } = await supabase.rpc('cerrar_y_crear_arancel', {
     p_tipo: tipo,
-    p_area_id: areaId,
+    p_area_id: areaId as string,
     p_monto: monto,
     p_vigente_desde: vigenteDesde,
   });

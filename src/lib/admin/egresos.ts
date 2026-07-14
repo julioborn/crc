@@ -33,8 +33,11 @@ export async function registrarEgreso(
     return { error: 'Iniciá sesión de nuevo.' };
   }
 
+  // El generador de tipos marca p_area_id como no-nulo, pero la función
+  // (uuid sin NOT NULL) acepta null sin problema — es club-wide cuando
+  // no hay área.
   const { data: comisionId } = await supabase.rpc('comision_responsable', {
-    p_area_id: areaId,
+    p_area_id: areaId as string,
   });
   if (!comisionId) {
     return { error: 'No hay ninguna comisión vigente para imputar este gasto.' };
