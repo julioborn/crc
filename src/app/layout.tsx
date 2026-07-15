@@ -25,7 +25,18 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: club.nombreCompleto,
   description: club.nombreCompleto,
-  icons: [{ rel: "icon", url: club.logo }],
+  icons: {
+    icon: club.logo,
+    apple: club.logo,
+  },
+  // iOS ignora bastante del manifest para decidir "modo app" — estos
+  // meta tags son lo que realmente hace que, al abrir desde el ícono
+  // agregado a inicio, window.navigator.standalone quede en true.
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: club.nombreCorto,
+  },
 };
 
 export default function RootLayout({
