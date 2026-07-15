@@ -124,15 +124,19 @@ Deno.serve(async (req: Request) => {
   const cuenta = JSON.parse(FIREBASE_SERVICE_ACCOUNT_JSON) as ServiceAccount;
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  const { data: pendientes, error } = await supabase
-    .from("notificacion")
-    .select("id, usuario_id, categoria, titulo, cuerpo, deep_link")
-    .eq("push_enviado", false)
-    .order("created_at")
-    .limit(200);
+  // reclamar_notificaciones_pendientes hace el SELECT + UPDATE en una
+  // sola transacción con FOR UPDATE SKIP LOCKED: si esta función corre
+  // dos veces en paralelo (cron + un disparo manual, por ejemplo), cada
+  // fila la agarra una sola invocación — nunca las dos. Un SELECT
+  // separado seguido de un UPDATE al final (como era antes) deja una
+  // ventana donde ambas leen "pendiente" y mandan el mismo push dos
+  // veces.
+  const { data: pendientes, error } = await supabase.rpc("reclamar_notificaciones_pendientes", {
+    p_limite: 200,
+  });
 
   if (error) {
-    console.error("push-send: no se pudo leer notificacion", error);
+    console.error("push-send: no se pudo reclamar notificacion", error);
     return new Response("error interno", { status: 500 });
   }
   if (!pendientes || pendientes.length === 0) {
@@ -178,11 +182,6 @@ Deno.serve(async (req: Request) => {
   if (tokensAEliminar.size > 0) {
     await supabase.from("dispositivo").delete().in("id", [...tokensAEliminar]);
   }
-
-  await supabase
-    .from("notificacion")
-    .update({ push_enviado: true })
-    .in("id", pendientes.map((n) => n.id));
 
   return new Response(
     JSON.stringify({ procesadas: pendientes.length, enviados, tokens_eliminados: tokensAEliminar.size }),
