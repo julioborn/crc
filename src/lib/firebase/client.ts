@@ -35,6 +35,23 @@ function obtenerMensajeria(): Promise<Messaging | null> {
 export type ResultadoPermiso = 'concedido' | 'denegado' | 'no_soportado' | 'error';
 
 /**
+ * En iOS, Safari/Chrome/lo que sea corren sobre el mismo motor de Apple
+ * (WebKit) y ese motor solo entrega push a una pestaña normal — no
+ * soporta Notification API en absoluto salvo que la página esté
+ * agregada a la pantalla de inicio (iOS 16.4+, modo standalone). Sin
+ * este chequeo, pedirPermisoYRegistrar devuelve 'no_soportado' sin
+ * explicar por qué.
+ */
+export function esIOSNoInstalada(): boolean {
+  if (typeof window === 'undefined') return false;
+  const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const esStandalone =
+    (window.navigator as { standalone?: boolean }).standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+  return esIOS && !esStandalone;
+}
+
+/**
  * Pide permiso de notificaciones (si todavía no se decidió) y, si se
  * concede, registra el service worker y guarda el token FCM vía
  * `registrar`. Diseñado para llamarse en un momento con intención real
