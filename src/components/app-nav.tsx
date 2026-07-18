@@ -33,7 +33,7 @@ function CredentialPill({
 
 export function AppNav({ nombreCompleto, esDirectiva, cargos, tieneAreasGestionadas }: Props) {
   return (
-    <header className="flex items-center justify-between bg-ink px-4 py-3 text-paper sm:px-6">
+    <header className="flex items-center justify-between bg-ink px-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3 text-paper sm:px-6">
       <Link href="/app" className="flex items-center gap-2.5">
         <Image src={club.logo} alt="" width={28} height={28} className="rounded" />
         <span className="font-display text-lg font-bold tracking-wide uppercase">
